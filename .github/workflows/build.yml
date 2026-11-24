@@ -50,6 +50,21 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
+      - name: Ensure Secrets Gradle Plugin template
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT_DIR="家族カレンダー (1)"
+          ENV_EXAMPLE="$PROJECT_DIR/.env.example"
+
+          if [ ! -f "$ENV_EXAMPLE" ]; then
+            echo "Creating the optional .env.example template required by the Secrets Gradle Plugin."
+            printf '%s\n'               '# Optional local development secrets.'               '# Keep real API keys in an untracked .env file or GitHub Actions secrets.'               'GEMINI_API_KEY=' > "$ENV_EXAMPLE"
+          fi
+
+          test -f "$ENV_EXAMPLE"
+          echo ".env.example is present."
+
       - name: Build debug APK
         shell: bash
         run: |
