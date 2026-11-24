@@ -59,11 +59,39 @@ jobs:
 
           if [ ! -f "$ENV_EXAMPLE" ]; then
             echo "Creating the optional .env.example template required by the Secrets Gradle Plugin."
-            printf '%s\n'               '# Optional local development secrets.'               '# Keep real API keys in an untracked .env file or GitHub Actions secrets.'               'GEMINI_API_KEY=' > "$ENV_EXAMPLE"
+            printf '%s\\n' \
+              '# Optional local development secrets.' \
+              '# Keep real API keys in an untracked .env file or GitHub Actions secrets.' \
+              'GEMINI_API_KEY=' > "$ENV_EXAMPLE"
           fi
 
           test -f "$ENV_EXAMPLE"
           echo ".env.example is present."
+
+      - name: Create CI debug keystore
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT_DIR="家族カレンダー (1)"
+          KEYSTORE="$PROJECT_DIR/debug.keystore"
+
+          if [ ! -f "$KEYSTORE" ]; then
+            echo "Generating the standard Android debug keystore for CI."
+            keytool -genkeypair -v \
+              -keystore "$KEYSTORE" \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          else
+            echo "Existing debug keystore found."
+          fi
+
+          test -s "$KEYSTORE"
+          keytool -list -keystore "$KEYSTORE" -storepass android -alias androiddebugkey
 
       - name: Build debug APK
         shell: bash
