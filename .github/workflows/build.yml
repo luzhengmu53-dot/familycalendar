@@ -24,16 +24,31 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # Explicitly install supported SDK packages.
+      # Do not request the obsolete "tools" package.
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools,platforms;android-36,build-tools;36.0.0'
+
+      - name: Accept Android SDK licenses
+        shell: bash
+        run: |
+          set -e
+          yes | sdkmanager --licenses >/dev/null
+
+      - name: Verify Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "ANDROID_HOME=${ANDROID_HOME:-not set}"
+          sdkmanager --list_installed
+          adb version
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses || true
 
       - name: Build debug APK
         shell: bash
@@ -71,6 +86,7 @@ jobs:
       - name: Verify APK
         shell: bash
         run: |
+          set -euo pipefail
           APK_PATH="家族カレンダー (1)/app/build/outputs/apk/debug/app-debug.apk"
           if [ ! -f "$APK_PATH" ]; then
             echo "ERROR: APK was not generated at: $APK_PATH"
