@@ -59,10 +59,11 @@ jobs:
 
           if [ ! -f "$ENV_EXAMPLE" ]; then
             echo "Creating the optional .env.example template required by the Secrets Gradle Plugin."
-            printf '%s\\n' \
-              '# Optional local development secrets.' \
-              '# Keep real API keys in an untracked .env file or GitHub Actions secrets.' \
-              'GEMINI_API_KEY=' > "$ENV_EXAMPLE"
+            cat > "$ENV_EXAMPLE" <<'EOF'
+# Optional local development secrets.
+# Keep real API keys in an untracked .env file or GitHub Actions secrets.
+GEMINI_API_KEY=
+EOF
           fi
 
           test -f "$ENV_EXAMPLE"
