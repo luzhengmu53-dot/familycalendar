@@ -1,25 +1,89 @@
-name: Build APK
+name: Android APK Build
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-      - name: Build APK
-        run: |
-          cd "家族カレンダー (1)"
-          chmod +x gradlew
-          ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          name: family-calendar-apk
+          gradle-version: '9.3.1'
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Build debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT_DIR="家族カレンダー (1)"
+          cd "$PROJECT_DIR"
+
+          echo "Project directory: $(pwd)"
+          echo "Java version:"
+          java -version
+          echo "Gradle version:"
+          gradle --version
+
+          if [ -f "./gradlew" ]; then
+            echo "Gradle Wrapper found. Using ./gradlew."
+            chmod +x ./gradlew
+            ./gradlew --no-daemon assembleDebug
+          else
+            echo "Gradle Wrapper script not found. Trying to generate it."
+            if gradle wrapper --gradle-version 9.3.1 --distribution-type bin; then
+              if [ -f "./gradlew" ]; then
+                chmod +x ./gradlew
+                ./gradlew --no-daemon assembleDebug
+              else
+                echo "Wrapper generation did not create gradlew. Using installed Gradle."
+                gradle --no-daemon assembleDebug
+              fi
+            else
+              echo "Wrapper generation failed. Falling back to installed Gradle."
+              gradle --no-daemon assembleDebug
+            fi
+          fi
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          APK_PATH="家族カレンダー (1)/app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            echo "ERROR: APK was not generated at: $APK_PATH"
+            echo "Available APK files:"
+            find "家族カレンダー (1)/app/build/outputs" -type f -name "*.apk" -print 2>/dev/null || true
+            exit 1
+          fi
+          ls -lh "$APK_PATH"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: family-calendar-debug-apk
           path: 家族カレンダー (1)/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
