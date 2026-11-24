@@ -89,7 +89,7 @@ jobs:
           fi
           echo "Secrets Gradle Plugin input files are ready."
 
-      - name: Create CI debug keystore
+      - name: Create CI debug keystore-v
         shell: bash
         run: |
           set -euo pipefail
