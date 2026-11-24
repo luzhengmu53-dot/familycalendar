@@ -24,12 +24,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Explicitly install supported SDK packages.
-      # Do not request the obsolete "tools" package.
+      # Install each Android SDK package as a separate entry.
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools,platforms;android-36,build-tools;36.0.0'
+          packages: |
+            platform-tools
+            platforms;android-36
+            build-tools;36.0.0
 
       - name: Accept Android SDK licenses
         shell: bash
