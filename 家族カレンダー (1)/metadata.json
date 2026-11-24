@@ -1,0 +1,6 @@
+{
+  "name": "家族カレンダー",
+  "description": "Googleアカウントで家族と予定を共有・編集できる家族専用カレンダー＆ホーム画面ウィジェットアプリ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

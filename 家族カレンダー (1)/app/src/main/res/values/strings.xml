@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">家族カレンダー</string>
+    <string name="widget_label">家族カレンダー</string>
+    <string name="widget_description">上部に月間カレンダー、下部に一番近い予定を表示する家族共有ウィジェット</string>
+    <string name="sign_in_with_google">Googleでログイン</string>
+</resources>
